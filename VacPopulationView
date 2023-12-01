@@ -1,0 +1,14 @@
+--USE CTE
+WITH PopvsVac
+as
+(
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(cast(vac.new_vaccinations as int)) OVER (partition by dea.location ORDER BY dea.location, dea.date) as RollingPeopleVaccinated
+FROM `portfolio-project-covid-406421.COVID_from_OWID.Deaths` dea
+JOIN `portfolio-project-covid-406421.COVID_from_OWID.Vaccinations` vac
+ON dea.location = vac.location
+AND dea.date = vac.date
+WHERE dea.continent is not null
+ORDER by 2,3
+)
+SELECT *, (RollingPeopleVaccinated/population)*100 AS PercentVaccinated
+From PopvsVac
